@@ -1,0 +1,79 @@
+# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
+
+# dependencies
+/node_modules
+/.pnp
+.pnp.*
+.yarn/*
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/versions
+
+# testing
+/coverage
+/test-results/
+/playwright-report/
+
+# next.js
+/.next/
+/.next-e2e/
+/out/
+
+# production
+/build
+
+# misc
+.DS_Store
+*.pem
+
+# debug
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+
+# env files (can opt-in for committing if needed)
+.env*
+!.env.example
+
+# vercel
+.vercel
+
+# typescript
+*.tsbuildinfo
+next-env.d.ts
+
+# Company data and internal documents (never versioned)
+/data/
+*.xlsx
+*.xls
+*.xlsm
+# Exception: the generated, 100% fictional public demo workbook
+# (scripts/inventory-import/demo-workbook.ts).
+!/fixtures/tralyn-demo.xlsx
+/docs/*.docx
+/docs/*.pdf
+
+# Supabase Studio local snippets (personal queries)
+/supabase/snippets/
+
+# Logs and database dumps
+*.log
+*.dump
+*.backup
+/backups/
+*.sql.gz
+# Plain SQL dumps at the repository root only (supabase/migrations/*.sql and
+# supabase/seed.sql must stay versioned).
+/*.sql
+
+# Certificates and private keys (e.g. the database CA certificate)
+*.key
+*.crt
+*.cer
+*.p12
+*.pfx
+
+# Data exports
+*.csv
