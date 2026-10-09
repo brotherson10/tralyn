@@ -93,6 +93,7 @@ describe("movementErrorMessage", () => {
     ["PROJECT_NOT_ACTIVE", "project_id"],
     ["PROJECT_NOT_FOUND", "project_id"],
     ["INVALID_QUANTITY", "quantity"],
+    ["ADJUSTMENT_NOTES_REQUIRED", "notes"],
     ["FORBIDDEN", "type"],
   ])("maps %s to the %s field", (message, field) => {
     expect(Object.keys(movementErrorMessage({ code: "P0001", message }).fieldErrors ?? {})).toEqual([field]);

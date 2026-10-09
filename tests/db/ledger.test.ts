@@ -43,6 +43,7 @@ describe("1. balance derived from the ledger", () => {
         p_product_id: product.id,
         p_type: type,
         p_quantity: quantity,
+        p_notes: type.startsWith("ADJUSTMENT") ? "Contagem física" : undefined,
       });
       expect(error).toBeNull();
       last = data![0].balance_after;
@@ -120,6 +121,7 @@ describe("3. outputs larger than the balance", () => {
       p_product_id: product.id,
       p_type: "ADJUSTMENT_OUT",
       p_quantity: 2,
+      p_notes: "Contagem física",
     });
     expect(error?.message).toBe("INSUFFICIENT_STOCK");
   });

@@ -34,7 +34,12 @@ beforeAll(async () => {
 afterAll(closeDb);
 
 const move = (client: Client, type: "OPENING_BALANCE" | "IN" | "OUT" | "ADJUSTMENT_IN" | "ADJUSTMENT_OUT") =>
-  client.rpc("register_stock_movement", { p_product_id: product.id, p_type: type, p_quantity: 1 });
+  client.rpc("register_stock_movement", {
+    p_product_id: product.id,
+    p_type: type,
+    p_quantity: 1,
+    ...(type.startsWith("ADJUSTMENT") ? { p_notes: "Contagem física" } : {}),
+  });
 
 describe("6a. viewer — read only", () => {
   it("reads products, stock and movements", async () => {

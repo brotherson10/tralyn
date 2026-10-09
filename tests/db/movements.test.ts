@@ -71,6 +71,58 @@ describe("registering movements by role", () => {
     expect(rows[0].n).toBe(0);
   });
 
+  it("the RPC itself refuses adjustments without notes (NULL, empty or blank)", async () => {
+    const product = await createProduct();
+    await register(admin, product.id, "IN", 10);
+    for (const type of ["ADJUSTMENT_IN", "ADJUSTMENT_OUT"] as const) {
+      for (const notes of [undefined, null, "", "   \n\t "]) {
+        const { data, error } = await admin.rpc("register_stock_movement", {
+          p_product_id: product.id,
+          p_type: type,
+          p_quantity: 1,
+          ...(notes === undefined ? {} : { p_notes: notes as string }),
+        });
+        expect(error?.message, `${type} ${JSON.stringify(notes)}`).toBe("ADJUSTMENT_NOTES_REQUIRED");
+        expect(data).toBeNull();
+      }
+    }
+    const { rows } = await db().query(`select count(*)::int as n from public.stock_movements where product_id = $1`, [product.id]);
+    expect(rows[0].n).toBe(1);
+    expect((await balance(product.id)).balance).toBe(10);
+  });
+
+  it("the RPC accepts adjustments with notes and stores them trimmed; IN/OUT need none", async () => {
+    const product = await createProduct();
+    const call = (type: string, notes?: string) =>
+      admin.rpc("register_stock_movement", { p_product_id: product.id, p_type: type as "IN", p_quantity: 1, ...(notes ? { p_notes: notes } : {}) });
+    expect((await call("IN")).error).toBeNull();
+    const adjusted = await call("ADJUSTMENT_IN", "  Contagem física  ");
+    expect(adjusted.error).toBeNull();
+    expect((await call("ADJUSTMENT_OUT", "Danos")).error).toBeNull();
+    expect((await call("OUT")).error).toBeNull();
+    const { rows } = await db().query(`select notes from public.stock_movements where id = $1`, [adjusted.data![0].movement_id]);
+    expect(rows[0].notes).toBe("Contagem física");
+    expect((await balance(product.id)).balance).toBe(0);
+  });
+
+  it("authorization still comes first: operator/viewer get FORBIDDEN for adjustments without notes", async () => {
+    const product = await createProduct();
+    for (const client of [operator, viewer]) {
+      for (const type of ["ADJUSTMENT_IN", "ADJUSTMENT_OUT"] as const) {
+        const { error } = await client.rpc("register_stock_movement", { p_product_id: product.id, p_type: type, p_quantity: 1 });
+        expect(error?.message).toBe("FORBIDDEN");
+      }
+    }
+  });
+
+  it("the service maps ADJUSTMENT_NOTES_REQUIRED to the notes field", async () => {
+    const product = await createProduct();
+    await register(admin, product.id, "IN", 1);
+    // Bypass the form schema (which already requires notes) to reach the RPC check.
+    const result = await registerMovement(admin, { ...input(product.id, "IN", 1), type: "ADJUSTMENT_IN", notes: null });
+    expect(result).toMatchObject({ ok: false, fieldErrors: { notes: expect.any(String) } });
+  });
+
   it("OPENING_BALANCE is not offered by the operational form (only the import uses it)", async () => {
     expect(movementSchema.safeParse({ product_id: crypto.randomUUID(), type: "OPENING_BALANCE", quantity: "1" }).success).toBe(false);
   });

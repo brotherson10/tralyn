@@ -46,6 +46,11 @@ export function movementErrorMessage(error: RpcErrorLike, unit = "un"): Friendly
       };
     case "INVALID_INPUT":
       return { message: "Dados da movimentação incompletos." };
+    case "ADJUSTMENT_NOTES_REQUIRED":
+      return {
+        message: "Nos ajustes, o motivo é obrigatório.",
+        fieldErrors: { notes: "Nos ajustes, explique o motivo nas observações (ex.: resultado da contagem física)." },
+      };
     case "FORBIDDEN":
       return {
         message: "O seu perfil não permite registar este tipo de movimentação.",
