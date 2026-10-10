@@ -1,10 +1,10 @@
 # Tralyn — Project Summary
 
-A technical case study of Tralyn, an independent full-stack warehouse inventory management project. For setup and reference documentation, see the [README](README.md).
+A technical case study of Tralyn, an independent full-stack warehouse inventory management project. Live read-only demo: [tralyn.vercel.app](https://tralyn.vercel.app). For setup and reference documentation, see the [README](README.md).
 
 ## 1. Context
 
-Tralyn is a portfolio engineering project inspired by a real warehouse workflow I observed in the sustainable-energy sector, where stock was tracked in a spreadsheet. I built it independently, to explore how far data integrity can be pushed into the database. All data in this repository is fictional.
+Tralyn is a portfolio engineering project inspired by a real warehouse workflow I observed in the sustainable-energy sector, where stock was tracked in a spreadsheet. I built it independently, to explore how far data integrity can be pushed into the database. It is not affiliated with, used by or endorsed by any company, and all data in this repository and in the public demo is fictional.
 
 ## 2. Problem
 
@@ -22,19 +22,21 @@ I framed the project around one question: what would it take for every unit of s
 
 ## 4. Architecture
 
-Next.js 16 (App Router, Server Components and Server Actions) renders the interface and validates input with Zod. Supabase provides authentication and PostgreSQL. A proxy requires a session on every route, a data access layer refuses inactive profiles, and every query runs under Row Level Security. Stock movements are written through a single `SECURITY DEFINER` RPC. Command-line tooling for imports and administration lives outside the web application. The intended deployment is Vercel with a hosted Supabase project.
+Next.js 16 (App Router, Server Components and Server Actions) renders the interface and validates input with Zod. Supabase provides authentication and PostgreSQL. A proxy requires a session on every route, a data access layer refuses inactive profiles, and every query runs under Row Level Security. Stock movements are written through a single `SECURITY DEFINER` RPC. Command-line tooling for imports and administration lives outside the web application. The application is deployed on Vercel with a hosted Supabase project, and the production runtime needs only the public URL and publishable key.
 
 ## 5. Stock Ledger
 
 The `stock_movements` table holds five movement types: `OPENING_BALANCE`, `IN`, `OUT`, `ADJUSTMENT_IN` and `ADJUSTMENT_OUT`. Quantities are always positive, and the type defines the direction. A view, `product_stock`, sums the ledger into the current balance and derives the status (OK, reorder, out of stock) from each product's minimum stock.
 
-Triggers reject `UPDATE`, `DELETE` and `TRUNCATE` for every role. A `BEFORE INSERT` trigger locks the product row and refuses any output above the balance, so concurrent exits on the same product are serialized and stock can never go negative. The responsible user comes from the session and the timestamp from the database clock; neither is a parameter. Mistakes are corrected with visible adjustments, never by editing history.
+Triggers reject `UPDATE`, `DELETE` and `TRUNCATE` for every role. A `BEFORE INSERT` trigger locks the product row and refuses any output above the balance, so concurrent exits on the same product are serialized and stock can never go negative. The responsible user comes from the session and the timestamp from the database clock; neither is a parameter. Mistakes are corrected with visible adjustments, never by editing history, and the RPC itself rejects an adjustment without a written reason.
 
 ## 6. Database Authorization
 
 There are three roles. Administrators can do everything, operators can register entries and exits, and viewers can only read. The movement RPC checks the role per movement type, and rejects `OPENING_BALANCE` for every role: opening balances exist only on the technical import path. Row Level Security limits reads to active profiles and writes on master data to administrators. A trigger prevents removing or demoting the last active administrator.
 
 Because the UI and the database both encode the permission matrix, a test compares them for every role and movement type, so they cannot silently drift apart.
+
+The public demo shares one read-only viewer account. Since any signed-in user may call the Auth API for their own account, a `BEFORE UPDATE` trigger on `auth.users` rejects changes to the password, e-mail and phone of explicitly locked accounts, whatever the caller, while sign-in, refresh and sign-out keep working. Which accounts are locked is operational data, kept out of the migrations.
 
 ## 7. Legacy Migration
 
@@ -54,14 +56,16 @@ Re-running an import records items as *already present* instead of duplicating t
 
 The test suites mirror the layers of responsibility:
 
-- **Unit (447):** validation, permissions, ledger rules, the import pipeline and the canonical workbook.
-- **Database / integration (237):** run against a local Supabase stack, with real signed-in users per role, so RLS, the RPC, the triggers and concurrency are exercised for real.
-- **End-to-end (61):** Playwright against a production build, including mobile navigation and responsive layouts.
+- **Unit (457):** validation, permissions, ledger rules, the import pipeline, the canonical workbook and the public demo configuration.
+- **Database / integration (257):** run against a local Supabase stack, with real signed-in users per role, so RLS, the RPC, the triggers, concurrency and the locked demo account (through the real Auth API) are exercised for real.
+- **End-to-end (68):** Playwright against a production build, including the public demo access, mobile navigation and responsive layouts.
 - **Demo environment (3):** the demo is repeatable, its roles are enforced by the database, and it refuses non-local targets.
 
 Type checking, linting, the production build and database linting complete the gate.
 
 ## 9. Demo Architecture
+
+The public demo runs the production build against a hosted Supabase project with the same fictional scenario. Visitors sign in with one click as a read-only viewer whose credentials are locked.
 
 `npm run demo:setup` rebuilds a complete demo on the local stack: it resets the database, provisions the technical identity and three fictional users, imports the canonical workbook through the real pipeline, creates suppliers and projects through the application's services, and registers operational movements through the RPC as those users. It then verifies the final state against pinned invariants.
 

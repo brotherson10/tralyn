@@ -19,6 +19,7 @@ Please include a description of the issue, the steps to reproduce it and the pot
 
 - **In scope:** the application code, the database schema, Row Level Security policies, the movement RPC and the tooling in this repository.
 - **Public demo:** any hosted demo uses fictional data only. Please do not run automated scanners, load tests or denial-of-service attempts against it, and do not try to access other users' data beyond what is needed to demonstrate an issue.
+- **Shared demo account:** the read-only viewer credentials used by the public demo are public by design, and their password and e-mail are locked in the database. Knowing or using them is not a vulnerability; being able to change data, change those credentials or act beyond the viewer role is. Signing out every session of the shared account (global sign-out) is a known limitation of a shared account.
 - **Out of scope:** vulnerabilities in third-party services and dependencies (please report those upstream), and issues that require physical access to a user's device.
 
 ## No Service Level Agreement
