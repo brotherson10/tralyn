@@ -4,7 +4,7 @@
 
 Stock is never edited directly: every balance is derived from an immutable, attributed movement ledger, and PostgreSQL enforces who may change it.
 
-**[Live demo](https://tralyn.vercel.app)** · [Portfolio](https://brotherson.dev/) · [Source](https://github.com/brotherson10/tralyn)
+**[Live demo](https://tralyn.vercel.app)** · [Watch demo video](https://youtu.be/4XeDwiE5B28) · [Portfolio](https://brotherson.dev/) · [Source](https://github.com/brotherson10/tralyn)
 
 ![Next.js](https://img.shields.io/badge/Next.js-16-000000?logo=nextdotjs&logoColor=white)
 ![TypeScript](https://img.shields.io/badge/TypeScript-5-3178C6?logo=typescript&logoColor=white)
@@ -13,7 +13,11 @@ Stock is never edited directly: every balance is derived from an immutable, attr
 
 > Independent portfolio project · all data is fictional · the user interface is in European Portuguese.
 
-<!-- Demo video: add the public video link or GitHub attachment here once it is published. -->
+## Video Demo
+
+[![Tralyn demo video: the product list as the read-only viewer, with a play button](docs/screenshots/00-video-thumbnail.png)](https://youtu.be/4XeDwiE5B28)
+
+A short walkthrough of the public read-only demo. [Watch on YouTube](https://youtu.be/4XeDwiE5B28).
 
 ## Screenshots
 
