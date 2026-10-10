@@ -3,6 +3,7 @@ import { TralynSymbol } from "@/components/brand/TralynLogo";
 import ConfigNotice from "@/components/layout/ConfigNotice";
 import { loginNotice } from "@/lib/auth/login";
 import { safeNextPath } from "@/lib/auth/routing";
+import { readPublicDemoViewer } from "@/lib/demo/public-demo";
 import { isSupabaseConfigured } from "@/lib/supabase/env";
 import LoginForm from "./LoginForm";
 
@@ -49,7 +50,7 @@ export default async function LoginPage({ searchParams }: { searchParams: Search
         </div>
       )}
 
-      <LoginForm next={next} disabled={!configured} />
+      <LoginForm next={next} disabled={!configured} demo={configured ? readPublicDemoViewer() : null} />
 
       <p className="mt-6 text-xs text-slate-500">
         O acesso é concedido pelo administrador. Não existe registo público.

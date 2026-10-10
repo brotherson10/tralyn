@@ -71,10 +71,13 @@ export interface TestUser {
 }
 
 /** Creates an auth user (the profile is created by the auth trigger), then sets role/active. */
-export async function createUser(role: Role, opts: { active?: boolean } = {}): Promise<TestUser> {
+export async function createUser(
+  role: Role,
+  opts: { active?: boolean; email?: string; password?: string } = {},
+): Promise<TestUser> {
   const id = randomUUID();
-  const email = `${role}-${id.slice(0, 8)}@test.local`;
-  const password = `Test-${randomUUID()}`;
+  const email = opts.email ?? `${role}-${id.slice(0, 8)}@test.local`;
+  const password = opts.password ?? `Test-${randomUUID()}`;
   await db().query(
     `insert into auth.users (
        instance_id, id, aud, role, email, encrypted_password, email_confirmed_at,

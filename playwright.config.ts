@@ -1,5 +1,6 @@
 import { defineConfig, devices } from "@playwright/test";
 import { localStack } from "./tests/db/helpers";
+import { E2E_DEMO_VIEWER, E2E_PUBLIC_DEMO } from "./tests/e2e/public-demo-fixture";
 
 /**
  * End-to-end tests run a production build against the LOCAL Supabase stack.
@@ -34,6 +35,9 @@ export default defineConfig({
       NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: stack.publishableKey,
       NEXT_PUBLIC_SUPABASE_ANON_KEY: "",
       SUPABASE_SERVICE_ROLE_KEY: "",
+      // Demo block off by default (even if .env.local sets it); fictitious values with E2E_PUBLIC_DEMO=1.
+      NEXT_PUBLIC_DEMO_VIEWER_EMAIL: E2E_PUBLIC_DEMO ? E2E_DEMO_VIEWER.email : "",
+      NEXT_PUBLIC_DEMO_VIEWER_PASSWORD: E2E_PUBLIC_DEMO ? E2E_DEMO_VIEWER.password : "",
     },
   },
 });
